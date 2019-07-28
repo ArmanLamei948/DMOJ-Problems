@@ -1,0 +1,83 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+
+public class Main {
+
+    static ArrayList<Integer> adj[];
+    static boolean[] visited;
+    static int[] prev;
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        String[] line = in.readLine().split(" ");
+        int n = Integer.parseInt(line[0]);
+        int q = Integer.parseInt(line[1]);
+        int[] v = new int[n];
+        line = in.readLine().split(" ");
+        adj = new ArrayList[n];
+        for (int i = 0; i < n; i++) {
+            v[i] = Integer.parseInt(line[i]);
+            adj[i] = new ArrayList<>();
+        }
+        for (int i = 1; i < n; i++) {
+            line = in.readLine().split(" ");
+            int a = Integer.parseInt(line[0]) - 1;
+            int b = Integer.parseInt(line[1]) - 1;
+            adj[a].add(b);
+            adj[b].add(a);
+        }
+        for (int i = 0; i < q; i++) {
+            line = in.readLine().split(" ");
+            int a = Integer.parseInt(line[1]) - 1;
+            int b = Integer.parseInt(line[2]) - 1;
+            visited = new boolean[n];
+            visited[a] = true;
+            prev = new int[n];
+            prev[a] = -1;
+            dfs(a);
+            int vertex = b;
+            ArrayList<Integer> values = new ArrayList<>();
+            values.add(v[vertex]);
+            while (prev[vertex] != -1) {
+                vertex = prev[vertex];
+                values.add(v[vertex]);
+            }
+            int len = values.size();
+            if (line[0].equals("1")) {
+                int sum = 0;
+                for (int j : values) sum += j;
+                System.out.println((int) Math.round((double) sum / len));
+            } else if (line[0].equals("2")) {
+                Collections.sort(values);
+                int ans;
+                if (len % 2 == 0) ans = (int) Math.round((values.get(len / 2) + values.get(len / 2 - 1)) / 2.0);
+                else ans = values.get(len / 2);
+                System.out.println(ans);
+            } else if (line[0].equals("3")) {
+                Collections.sort(values);
+                HashMap<Integer, Integer> occurence = new HashMap<>();
+                for (int j : values) occurence.put(j, occurence.containsKey(j) ? occurence.get(j) + 1 : 1);
+                int max = 0;
+                for (int j : values) max = Math.max(max, occurence.get(j));
+                for (int j : values) {
+                    if (occurence.get(j) == max) {
+                        System.out.println(j);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    static void dfs (int v) {
+        for (int i : adj[v]) {
+            if (!visited[i]) {
+                visited[i] = true;
+                prev[i] = v;
+                dfs(i);
+            }
+        }
+    }
+}
