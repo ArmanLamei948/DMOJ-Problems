@@ -1,0 +1,55 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
+
+public class Shortest_Path_Around_V2 {
+// hello there
+    public static void main(String[] args) throws Exception{
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        for (int k = 0; k < 5; k++) {
+            char[][] grid = new char[8][8];
+            int a = -1;
+            int b = -1;
+            for (int i = 0; i < 8; i++) {
+                String line = in.readLine();
+                for (int j = 0; j < 8; j++) {
+                    grid[i][j] = line.charAt(j);
+                    if (grid[i][j] == 'A') a = i * 8 + j;
+                    if (grid[i][j] == 'B') b = i * 8 + j;
+                }
+            }
+            ArrayList<Integer> adj[] = new ArrayList[64];
+            int[][] moves = {{-1, 0}, {-1, 1}, {0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}};
+            for (int i = 0; i < 8; i++) {
+                for (int j = 0; j < 8; j++) {
+                    int cell = i * 8 + j;
+                    adj[cell] = new ArrayList<>();
+                    if (grid[i][j] == '#') continue;
+                    for (int[] move : moves) {
+                        int y = i + move[0];
+                        int x = j + move[1];
+                        if (y >= 0 && y < 8 && x >= 0 && x < 8 && grid[y][x] != '#') adj[cell].add(y * 8 + x);
+                    }
+                }
+            }
+            Queue<Integer> queue = new LinkedList<>();
+            queue.add(a);
+            boolean[] visited = new boolean[64];
+            visited[a] = true;
+            int[] depth = new int[64];
+            while (!queue.isEmpty()) {
+                int v = queue.remove();
+                for (int i : adj[v]) {
+                    if (!visited[i]) {
+                        queue.add(i);
+                        visited[i] = true;
+                        depth[i] = depth[v] + 1;
+                    }
+                }
+            }
+            System.out.println(depth[b]);
+        }
+    }
+}
