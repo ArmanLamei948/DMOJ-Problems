@@ -1,0 +1,68 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.LinkedList;
+import java.util.Queue;
+
+public class Main {
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        int n = Integer.parseInt(in.readLine());
+        int t = Integer.parseInt(in.readLine());
+        int[] a = new int[t];
+        int[] b = new int[t];
+        int[] c = new int[t];
+        int[] neighbours = new int[n];
+        for (int i = 0; i < t; i++) {
+            String[] line = in.readLine().split(" ");
+            a[i] = Integer.parseInt(line[0]) - 1;
+            b[i] = Integer.parseInt(line[1]) - 1;
+            neighbours[a[i]]++;
+            neighbours[b[i]]++;
+            c[i] = Integer.parseInt(line[2]);
+        }
+        int[] index = new int[n];
+        int[][] adj = new int[n][];
+        int[][] weight = new int[n][];
+        int[] shortest = new int[n];
+        for (int i = 0; i < n; i++) {
+            adj[i] = new int[neighbours[i]];
+            weight[i] = new int[neighbours[i]];
+            shortest[i] = Integer.MAX_VALUE;
+        }
+        for (int i = 0; i < t; i++) {
+            adj[a[i]][index[a[i]]] = b[i];
+            weight[a[i]][index[a[i]]] = c[i];
+            index[a[i]]++;
+            adj[b[i]][index[b[i]]] = a[i];
+            weight[b[i]][index[b[i]]] = c[i];
+            index[b[i]]++;
+        }
+        int k = Integer.parseInt(in.readLine());
+        int[] pencils = new int[k];
+        int[] cost = new int[k];
+        for (int i = 0; i < k; i++) {
+            String[] line = in.readLine().split(" ");
+            pencils[i] = Integer.parseInt(line[0]) - 1;
+            cost[i] = Integer.parseInt(line[1]);
+        }
+        int d = Integer.parseInt(in.readLine()) - 1;
+        Queue<Integer> queue = new LinkedList<>();
+        queue.add(d);
+        shortest[d] = 0;
+        while (!queue.isEmpty()) {
+            int v = queue.remove();
+            for (int i = 0; i < adj[v].length; i++) {
+                int node = adj[v][i];
+                int cand = shortest[v] + weight[v][i];
+                if (cand < shortest[node]) {
+                    queue.add(node);
+                    shortest[node] = cand;
+                }
+            }
+        }
+        int min = Integer.MAX_VALUE;
+        for (int i = 0; i < k; i++) min = Math.min(min, shortest[pencils[i]] + cost[i]);
+        System.out.println(min);
+    }
+}
