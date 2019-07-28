@@ -1,0 +1,154 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
+
+public class Velociraptor_Maze {
+// hello there
+    static char[][] grid;
+    static boolean[][] visited;
+    static int[][] hprevy;
+    static int[][] hprevx;
+    static int[][] vprevy;
+    static int[][] vprevx;
+    static int r;
+    static int c;
+    static int[][] moves = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        r = Integer.parseInt(in.readLine());
+        c = Integer.parseInt(in.readLine());
+        int[] ys = new int[26];
+        int[] xs = new int[26];
+        grid = new char[r][c];
+        for (int y = 0; y < r; y++) {
+            grid[y] = in.readLine().toCharArray();
+            for (int x = 0; x < c; x++) {
+                try {
+                    int temp = grid[y][x] - 65;
+                    ys[temp] = y;
+                    xs[temp] = x;
+                } catch (ArrayIndexOutOfBoundsException e) {
+                }
+            }
+        }
+        hprevy = new int[r][c];
+        hprevx = new int[r][c];
+        int h = 'H' - 65;
+        visited = new boolean[r][c];
+        int yh = ys[h];
+        int xh = xs[h];
+        hprevy[yh][xh] = -1;
+        hprevx[yh][xh] = -1;
+        HSearch(yh, xh);
+        ArrayList<Integer> hpathy = new ArrayList<>();
+        ArrayList<Integer> hpathx = new ArrayList<>();
+        int e = 'E' - 65;
+        int ycur = ys[e];
+        int xcur = xs[e];
+        while (ycur != - 1 && xcur != -1 && hprevy[ycur][xcur] != -1 && hprevx[ycur][xcur] != -1) {
+            hpathy.add(ycur);
+            hpathx.add(xcur);
+            int temp = ycur;
+            ycur = hprevy[ycur][xcur];
+            xcur = hprevx[temp][xcur];
+        }
+        Collections.reverse(hpathy);
+        Collections.reverse(hpathx);
+        int v = 'V' - 65;
+        visited = new boolean[r][c];
+        vprevy = new int[r][c];
+        vprevx = new int[r][c];
+        int yv = ys[v];
+        int xv = xs[v];
+        VSearch(yv, xv);
+        vprevy[yv][xv] = -1;
+        vprevx[yv][xv] = -1;
+        ArrayList<Integer> tvpathy1 = new ArrayList<>();
+        ArrayList<Integer> tvpathx1 = new ArrayList<>();
+        ArrayList<Integer> tvpathy2 = new ArrayList<>();
+        ArrayList<Integer> tvpathx2 = new ArrayList<>();
+        ycur = ys[e];
+        xcur = xs[e];
+        while (vprevy[ycur][xcur] != -1 && vprevx[ycur][xcur] != -1) {
+            tvpathy1.add(ycur);
+            tvpathx1.add(xcur);
+            int temp = ycur;
+            ycur = vprevy[ycur][xcur];
+            xcur = vprevx[temp][xcur];
+            tvpathy2.add(ycur);
+            tvpathx2.add(xcur);
+            if (vprevy[ycur][xcur] == -1 || vprevx[ycur][xcur] == -1) break;
+            temp = ycur;
+            ycur = vprevy[ycur][xcur];
+            xcur = vprevx[temp][xcur];
+        }
+        tvpathy1.add(yv);
+        tvpathx1.add(xv);
+        Collections.reverse(tvpathy1);
+        Collections.reverse(tvpathx1);
+        Collections.reverse(tvpathy2);
+        Collections.reverse(tvpathx2);
+        ArrayList<Integer> vpathy1;
+        ArrayList<Integer> vpathx1;
+        ArrayList<Integer> vpathy2;
+        ArrayList<Integer> vpathx2;
+        if (tvpathy1.get(0).equals(yv) && tvpathx1.get(0).equals(xv)) {
+            vpathy1 = tvpathy2;
+            vpathx1 = tvpathx2;
+            tvpathy1.remove(0);
+            tvpathx1.remove(0);
+            vpathy2 = tvpathy1;
+            vpathx2 = tvpathx1;
+        }
+        else {
+            vpathy1 = tvpathy1;
+            vpathx1 = tvpathx1;
+            tvpathy2.remove(0);
+            tvpathx2.remove(0);
+            vpathy2 = tvpathy2;
+            vpathx2 = tvpathx2;
+        }
+        e = Math.min(hpathy.size(), tvpathy2.size());
+        for (int i = 0; i < e; i++) {
+            if (hpathy.get(i).equals(vpathy1.get(i)) || hpathy.get(i).equals(vpathy2.get(i))) {
+                if (hpathx.get(i).equals(vpathx1.get(i)) || hpathx.get(i).equals(vpathx2.get(i))) {
+                    System.out.println(Math.max(i, 1));
+                    System.exit(0);
+                }
+            }
+        }
+        System.out.println(hpathy.size() < vpathy1.size() ? "escape" : hpathy.size());
+    }
+
+    static void HSearch(int y, int x) {
+        visited[y][x] = true;
+        for (int[] move : moves) {
+            int y2 = y + move[0];
+            int x2 = x + move[1];
+            if (Valid(y2, x2)) {
+                hprevy[y2][x2] = y;
+                hprevx[y2][x2] = x;
+                HSearch(y2, x2);
+            }
+        }
+    }
+
+    static void VSearch(int y, int x) {
+        visited[y][x] = true;
+        for (int[] move : moves) {
+            int y2 = y + move[0];
+            int x2 = x + move[1];
+            if (Valid(y2, x2)) {
+                vprevy[y2][x2] = y;
+                vprevx[y2][x2] = x;
+                VSearch(y2, x2);
+            }
+        }
+    }
+
+    static boolean Valid(int y, int x) {
+        return 0 <= y && y < r && 0 <= x && x < c && !visited[y][x] && grid[y][x] != '#';
+    }
+}
