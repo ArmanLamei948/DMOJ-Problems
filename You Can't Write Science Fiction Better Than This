@@ -1,0 +1,60 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
+
+public class You_Cant_Write_Science_Fiction {
+// hello there
+    public static void main(String[] args) throws Exception {
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        String[] line = in.readLine().split(" ");
+        int n = Integer.parseInt(line[0]);
+        int m = Integer.parseInt(line[1]);
+        int a = Integer.parseInt(line[2]) - 1;
+        int b = Integer.parseInt(line[3]) - 1;
+        ArrayList<Integer> adj[] = new ArrayList[n];
+        for (int i = 0; i < n; i++) adj[i] = new ArrayList<>();
+        for (int i = 0; i < m; i++) {
+            line = in.readLine().split(" ");
+            int x = Integer.parseInt(line[0]) - 1;
+            int y = Integer.parseInt(line[1]) - 1;
+            adj[x].add(y);
+            adj[y].add(x);
+        }
+        Queue<Integer> queue = new LinkedList<>();
+        queue.add(0);
+        boolean[] visited = new boolean[n];
+        visited[0] = true;
+        int[] depth = new int[n];
+        while (!queue.isEmpty()) {
+            int v = queue.remove();
+            for (int i : adj[v]) {
+                if (!visited[i]) {
+                    queue.add(i);
+                    visited[i] = true;
+                    depth[i] = depth[v] + 1;
+                }
+            }
+        }
+        if (!visited[a]) {
+            System.out.println(-1);
+            System.exit(0);
+        }
+        queue = new LinkedList<>();
+        queue.add(a);
+        visited = new boolean[n];
+        visited[a] = true;
+        while (!queue.isEmpty()) {
+            int v = queue.remove();
+            for (int i : adj[v]) {
+                if (!visited[i]) {
+                    queue.add(i);
+                    visited[i] = true;
+                    depth[i] = depth[v] + 1;
+                }
+            }
+        }
+        System.out.println(visited[b] ? depth[b] : -1);
+    }
+}
