@@ -1,0 +1,115 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
+
+public class Phonomenal_Reviews {
+
+    static ArrayList<Integer> adj[];
+    static boolean[] visited;
+    static int[] depth;
+    static int[] prev;
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        String[] line = in.readLine().split(" ");
+        int n = Integer.parseInt(line[0]);
+        int m = Integer.parseInt(line[1]);
+        int[] pho = new int[m];
+        boolean[] presturant = new boolean[n];
+        line = in.readLine().split(" ");
+        for (int i = 0; i < m; i++) {
+            pho[i] = Integer.parseInt(line[i]);
+            presturant[pho[i]] = true;
+        }
+        adj = new ArrayList[n];
+        HashSet<Integer> unneeded = new HashSet<>();
+        for (int i = 0; i < n; i++) {
+            adj[i] = new ArrayList<>();
+            unneeded.add(i);
+        }
+        for (int i = 1; i < n; i++) {
+            line = in.readLine().split(" ");
+            int a = Integer.parseInt(line[0]);
+            int b = Integer.parseInt(line[1]);
+            adj[a].add(b);
+            adj[b].add(a);
+        }
+        int start = pho[0];
+        visited = new boolean[n];
+        visited[start] = true;
+        depth = new int[n];
+        prev = new int[n];
+        prev[start] = -1;
+        dfs(start);
+        for (int i = 0; i < n; i++) if (depth[i] > depth[start] && presturant[i]) start = i;
+        visited = new boolean[n];
+        visited[start] = true;
+        depth = new int[n];
+        prev = new int[n];
+        prev[start] = -1;
+        dfs(start);
+        int end = start;
+        for (int i = 0; i < n; i++) if (depth[i] > depth[end] && presturant[i]) end = i;
+        HashSet<Integer> longest = new HashSet<>();
+        int v = end;
+        unneeded.remove(end);
+        longest.add(end);
+        while (prev[v] != -1) {
+            v = prev[v];
+            unneeded.remove(v);
+            longest.add(v);
+        }
+        HashSet<Integer> other = new HashSet<>();
+        for (int i : pho) if (!longest.contains(i)) other.add(i);
+        visited = new boolean[n];
+        for (int i : other) {
+            v = i;
+            visited[v] = true;
+            unneeded.remove(v);
+            while (prev[v] != -1 && !visited[prev[v]]) {
+                v = prev[v];
+                unneeded.remove(v);
+                visited[v] = true;
+            }
+        }
+        Queue<Integer> queue = new LinkedList<>();
+        queue.add(end);
+        visited = new boolean[n];
+        visited[end] = true;
+        int[] before = new int[n];
+        before[end] = -1;
+        while (!queue.isEmpty()) {
+            v = queue.remove();
+            for (int i : adj[v]) {
+                if (!visited[i]) {
+                    queue.add(i);
+                    visited[i] = true;
+                    before[i] = v;
+                }
+            }
+        }
+        visited = new boolean[n];
+        for (int i : other) {
+            v = i;
+            while (before[v] != -1 && !visited[before[v]]) {
+                v = before[v];
+                unneeded.remove(v);
+                visited[v] = true;
+            }
+        }
+        System.out.println(longest.size()-1 + 2*(n-unneeded.size()-longest.size()));
+    }
+    static void dfs (int v) {
+        for (int i : adj[v]) {
+            if (!visited[i]) {
+                visited[i] = true;
+                depth[i] = depth[v] + 1;
+                prev[i] = v;
+                dfs(i);
+            }
+        }
+    }
+}
