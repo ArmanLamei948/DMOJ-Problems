@@ -1,0 +1,131 @@
+import java.util.Scanner;
+
+public class A_Plus_B_Hard {
+    // Hello there
+    public static void main(String[] args) {
+        Scanner in = new Scanner(System.in);
+        int n = in.nextInt();
+        for (int i = 0; i < n; i++) {
+            String[] temp1 = in.next().split("");
+            String[] temp2 = in.next().split("");
+            boolean p1 = true;
+            boolean p2 = true;
+            int x = temp1.length;
+            int y = temp2.length;
+            if (temp1[0].equals("-")) {
+                String[] temp3 = new String[x-1];
+                for (int j = 1; j < x; j++) temp3[j-1] = temp1[j];
+                temp1 = temp3;
+                p1 = false;
+            }
+            if (temp2[0].equals("-")) {
+                String[] temp3 = new String[y-1];
+                for (int j = 1; j < y; j++) temp3[j-1] = temp2[j];
+                temp2 = temp3;
+                p2 = false;
+            }
+            x = temp1.length;
+            y = temp2.length;
+            int m = x >= y ? x : y;
+            int[] a = new int[m];
+            int[] b = new int[m];
+            Create(temp1, a);
+            Create(temp2, b);
+            int[] ans;
+            String prefix = "";
+            if (p1) {
+                if (p2) ans = Add(a, b);
+                else {
+                    if (Less(a, b)) {
+                        prefix = "-";
+                        ans = Subtract(b, a);
+                    }
+                    else ans = Subtract(a, b);
+                }
+            }
+            else {
+                if (p2) {
+                    if (Less(b, a)) {
+                        prefix = "-";
+                        ans = Subtract(a, b);
+                    }
+                    else ans = Subtract(b, a);
+                }
+                else {
+                    prefix = "-";
+                    ans = Add(a, b);
+                }
+            }
+            System.out.print(prefix);
+            for (int j : ans) System.out.print(j);
+            System.out.println();
+        }
+    }
+    static void Create (String[] temp, int[] arr) {
+        int x = temp.length;
+        int y = arr.length;
+        for (int i = 0; i < x; i++) arr[y-i-1] = Integer.parseInt(temp[x-i-1]);
+    }
+    static boolean Less (int[] a, int[] b) {
+        int m = a.length;
+        for (int i = 0; i < m; i++) {
+            if (a[i] < b[i]) return true;
+            if (a[i] > b[i]) return false;
+        }
+        return false;
+    }
+    static int[] Add (int[] a, int[] b) {
+        int m = a.length;
+        int[] ret1 = new int[m];
+        int[] carry = new int[m];
+        for (int i = m-1; i >= 1; i--) {
+            int temp = a[i] + b[i] + carry[i];
+            if (temp >= 10) {
+                carry[i-1] = 1;
+                ret1[i] = temp - 10;
+            }
+            else ret1[i] = temp;
+        }
+        int temp = a[0] + b[0] + carry[0];
+        if (temp >= 10) {
+            int[] ret = new int[m+1];
+            for (int i = 1; i < m; i++) ret[i+1] = ret1[i];
+            ret[0] = 1;
+            ret[1] = temp - 10;
+            return ret;
+        }
+        else {
+            ret1[0] = temp;
+            return ret1;
+        }
+    }
+    static int[] Subtract (int[] a, int[] b) {
+        int m = a.length;
+        int[] ret = new int[m];
+        int[] carry = new int[m];
+        for (int i = m-1; i >= 1; i--) {
+            if (a[i] + carry[i] < b[i]) {
+                carry[i] += 10;
+                carry[i-1]--;
+            }
+            ret[i] = a[i] + carry[i] - b[i];
+        }
+        ret[0] = a[0] + carry[0] - b[0];
+        int len = m;
+        boolean made = false;
+        for (int i = 0; i < m; i++) {
+            if (ret[i] != 0) {
+                len = m-i;
+                made = true;
+                break;
+            }
+        }
+        if (made) {
+            int[] ans = new int[len];
+            for (int i = 0; i < len; i++) ans[len - i - 1] = ret[m - i - 1];
+            return ans;
+        }
+        int[] ans = {0};
+        return ans;
+    }
+}
